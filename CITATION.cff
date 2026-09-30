@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this implementation, please cite the FedCANTO manuscript and this repository."
+title: "FedCANTO: Paired Evidence-Routed Gate Fusion for Heterogeneous Federated Learning"
+type: software
+authors:
+  - family-names: Yin
+    given-names: Zilong
+repository-code: "https://github.com/LieLieLieLieLie/FedCANTO"
+license: LicenseRef-FedCANTO-Academic-Evaluation-1.0
+version: 1.0.0
+date-released: 2026-09-30

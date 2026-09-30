@@ -1,0 +1,25 @@
+# Third-party data and generated experiment artifacts are intentionally excluded.
+/data/
+/results/
+
+# Python caches and local environments.
+__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Local editor and operating-system files.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Temporary files.
+/tmp/
+*.log
+*.tmp
+

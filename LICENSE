@@ -1,0 +1,40 @@
+FedCANTO Academic Evaluation License, Version 1.0
+
+Copyright (c) 2026 The FedCANTO Authors. All rights reserved.
+
+The accompanying source code, scripts, documentation, and related materials
+(collectively, the "Software") are made available solely for personal,
+non-commercial academic evaluation and for reproducing the results reported in
+the FedCANTO manuscript.
+
+Subject to the conditions below, you may download, run, and privately modify
+the Software for those purposes. Any scholarly use must clearly identify the
+Software as FedCANTO, retain this notice, and cite the FedCANTO manuscript and
+repository when the corresponding citation information is available.
+
+You may not, without prior written permission from the copyright holders:
+
+1. redistribute, sublicense, sell, host, mirror, or publish the Software or a
+   substantial derivative of it;
+2. use the Software or a substantial derivative for commercial purposes;
+3. remove or obscure authorship, copyright, provenance, or citation notices;
+4. present, submit, publish, or otherwise represent the Software, its text,
+   algorithms, figures, experimental design, results, or substantial
+   derivatives as your own original work; or
+5. incorporate substantial portions into another manuscript, repository,
+   product, or service without explicit attribution and written permission.
+
+This license grants no patent, trademark, or publicity rights. Third-party
+datasets and dependencies are governed by their own licenses and are not
+redistributed with this repository.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM,
+OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+For permissions beyond this license, contact the repository owner through
+https://github.com/LieLieLieLieLie/FedCANTO.
+
