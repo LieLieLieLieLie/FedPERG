@@ -13,14 +13,14 @@ TABLES = ROOT / "results" / "tables"
 DATASETS = ("cifar10", "cifar100", "officehome")
 REGIMES = ("label_skew", "quantity_skew", "compound")
 METHODS = ("FedAvg", "FedAvgM", "SCAFFOLD", "FedAdam", "FedLAW",
-           "FedCDA", "FedPW", "Fed-NGA", "FedPhoenix", "FedCANTO")
+           "FedCDA", "FedPW", "Fed-NGA", "FedPhoenix", "FedPERG")
 
 
 def load(dataset: str, regime: str, method: str, seed: int) -> dict:
-    tag = ("round13_frozen_public_gate_confirmation" if method == "FedCANTO"
+    tag = ("round13_frozen_public_gate_confirmation" if method == "FedPERG"
            else "round13_public_ten_method_matrix")
     stem = f"{dataset}__{regime}__{method.lower().replace('-', '_')}__s{seed}"
-    if method == "FedCANTO": stem += "__lite_gate_bank_selector"
+    if method == "FedPERG": stem += "__lite_gate_bank_selector"
     return json.loads((MODELS / f"{stem}__{tag}.json").read_text(encoding="utf-8"))
 
 

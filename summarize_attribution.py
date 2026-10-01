@@ -18,7 +18,7 @@ TAG = "round14_final_paired_confirmation"
 
 
 def load(dataset: str, regime: str, variant: str, seed: int) -> dict:
-    path = MODELS / (f"{dataset}__{regime}__fedcanto__s{seed}__{variant}__{TAG}.json")
+    path = MODELS / (f"{dataset}__{regime}__fedperg__s{seed}__{variant}__{TAG}.json")
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -56,29 +56,29 @@ def main() -> None:
     for dataset, regime in TASKS:
         for seed in range(50, 60):
             router = load(dataset, regime, "lite_paired_gate_bank_router_control", seed)
-            canto = load(dataset, regime, "lite_paired_gate_bank_selector", seed)
+            perg = load(dataset, regime, "lite_paired_gate_bank_selector", seed)
             gate = load_gate(dataset, regime, seed)
             router_auc = 100 * router["final"]["convergence_auc"]
-            canto_auc = 100 * canto["final"]["convergence_auc"]
+            perg_auc = 100 * perg["final"]["convergence_auc"]
             gate_auc = 100 * gate["final"]["convergence_auc"]
             rows.append({
                 "dataset": dataset, "regime": regime, "seed": seed,
                 "gate_auc_pct": gate_auc,
-                "router_auc_pct": router_auc, "fedcanto_auc_pct": canto_auc,
-                "delta_pp": canto_auc - router_auc,
+                "router_auc_pct": router_auc, "fedperg_auc_pct": perg_auc,
+                "delta_pp": perg_auc - router_auc,
                 "router_minus_gate_pp": router_auc - gate_auc,
-                "canto_minus_gate_pp": canto_auc - gate_auc,
+                "perg_minus_gate_pp": perg_auc - gate_auc,
                 "gate_server_ms_round": 1000 * mean(d["aggregation_seconds"]
                                                       for d in gate["diagnostics"]),
                 "router_server_ms_round": 1000 * mean(d["aggregation_seconds"]
                                                         for d in router["diagnostics"]),
-                "fedcanto_server_ms_round": 1000 * mean(d["aggregation_seconds"]
-                                                         for d in canto["diagnostics"]),
+                "fedperg_server_ms_round": 1000 * mean(d["aggregation_seconds"]
+                                                         for d in perg["diagnostics"]),
                 "router_wall_s": router["runtime_seconds"],
-                "fedcanto_wall_s": canto["runtime_seconds"],
+                "fedperg_wall_s": perg["runtime_seconds"],
                 "gate_wall_s": gate["runtime_seconds"],
                 "evidence_selection_rate": mean(d.get("selector_used_target_evidence", False)
-                                                for d in canto["diagnostics"]),
+                                                for d in perg["diagnostics"]),
             })
     TABLES.mkdir(parents=True, exist_ok=True)
     with (TABLES / "round14_final_paired_runs.csv").open("w", newline="", encoding="utf-8") as f:
@@ -90,7 +90,7 @@ def main() -> None:
         task_summary.append({
             "dataset": dataset, "regime": regime,
             "router_auc_pct": mean(x["router_auc_pct"] for x in cells),
-            "fedcanto_auc_pct": mean(x["fedcanto_auc_pct"] for x in cells),
+            "fedperg_auc_pct": mean(x["fedperg_auc_pct"] for x in cells),
             "delta_pp": mean(effects), "paired_sd_pp": stdev(effects),
             "positive_seeds": sum(x > 0 for x in effects),
             "evidence_selection_rate": mean(x["evidence_selection_rate"] for x in cells),
@@ -100,11 +100,11 @@ def main() -> None:
     source_mean, source_ci = cluster_effect(rows, True, 1450)
     task_mean, task_ci = cluster_effect(rows, False, 1451)
     router_gate_mean, router_gate_ci = cluster_effect(rows, True, 1452, "router_minus_gate_pp")
-    canto_gate_mean, canto_gate_ci = cluster_effect(rows, True, 1453, "canto_minus_gate_pp")
+    perg_gate_mean, perg_gate_ci = cluster_effect(rows, True, 1453, "perg_minus_gate_pp")
     report = {
         "status": "frozen_final_paired_confirmation_complete",
         "paired_runs": len(rows),
-        "primary_estimand": "source-balanced FedCANTO minus Router-only AUC",
+        "primary_estimand": "source-balanced FedPERG minus Router-only AUC",
         "bootstrap_unit": "paired seed cluster; all source/regime cells move together",
         "source_balanced_delta_pp": source_mean,
         "source_balanced_ci95_pp": source_ci,
@@ -112,17 +112,17 @@ def main() -> None:
         "task_weighted_ci95_pp": task_ci,
         "router_minus_gate_source_balanced_pp": router_gate_mean,
         "router_minus_gate_source_balanced_ci95_pp": router_gate_ci,
-        "fedcanto_minus_gate_source_balanced_pp": canto_gate_mean,
-        "fedcanto_minus_gate_source_balanced_ci95_pp": canto_gate_ci,
+        "fedperg_minus_gate_source_balanced_pp": perg_gate_mean,
+        "fedperg_minus_gate_source_balanced_ci95_pp": perg_gate_ci,
         "positive_pairs": sum(x["delta_pp"] > 0 for x in rows),
         "mean_evidence_selection_rate": mean(x["evidence_selection_rate"] for x in rows),
         "mean_server_ms_round": {
             "AvgM+Gate": mean(x["gate_server_ms_round"] for x in rows),
             "Router-only": mean(x["router_server_ms_round"] for x in rows),
-            "FedCANTO": mean(x["fedcanto_server_ms_round"] for x in rows)},
+            "FedPERG": mean(x["fedperg_server_ms_round"] for x in rows)},
         "mean_wall_s": {"AvgM+Gate": mean(x["gate_wall_s"] for x in rows),
                         "Router-only": mean(x["router_wall_s"] for x in rows),
-                        "FedCANTO": mean(x["fedcanto_wall_s"] for x in rows)},
+                        "FedPERG": mean(x["fedperg_wall_s"] for x in rows)},
         "task_summary": task_summary,
     }
     (MODELS / "round14_final_paired_statistics.json").write_text(

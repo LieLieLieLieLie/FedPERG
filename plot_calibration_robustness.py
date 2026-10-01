@@ -40,7 +40,7 @@ def main() -> None:
     raw = json.loads((MODELS / "round14_raw_final_paired_statistics.json").read_text())
     labels = ["1%", "2%", "4%", "8%", "4%\n+ label shift"]
     x = np.arange(5)
-    effect = np.array([r["canto_minus_router_pp"] for r in robust])
+    effect = np.array([r["perg_minus_router_pp"] for r in robust])
     sd = np.array([r["effect_sd_pp"] for r in robust])
     select = 100 * np.array([r["evidence_selection_rate"] for r in robust])
     agree = 100 * np.array([r["decision_agreement"] for r in robust])
@@ -87,11 +87,11 @@ def main() -> None:
     colors = [RED if vals[i] >= 0 else BLUE for i in order]
     ax.barh(np.arange(len(vals)), vals[order], color=colors, alpha=.9)
     ax.axvline(0, color="#333333", lw=1); ax.set_yticks(np.arange(len(vals)), np.array(names)[order], rotation=28)
-    ax.set_xlabel("FedCANTO − Router-only AUC (pp) ↑")
+    ax.set_xlabel("FedPERG − Router-only AUC (pp) ↑")
     panel(ax, "d", "Task-resolved evidence effect")
 
     ax = axes[1, 1]
-    methods = ["AvgM+Gate", "Router-only", "FedCANTO"]
+    methods = ["AvgM+Gate", "Router-only", "FedPERG"]
     fixed = [final["mean_server_ms_round"][m] for m in methods]
     raw_ms = [raw["mean_server_ms_round"][m] for m in methods]
     xx = np.arange(3); width = .36
@@ -102,17 +102,17 @@ def main() -> None:
     panel(ax, "e", "Matched-resource cost")
 
     ax = axes[1, 2]
-    values = [final["router_minus_gate_source_balanced_pp"], final["fedcanto_minus_gate_source_balanced_pp"], raw["canto_minus_router_pp"]]
-    lo = [final["router_minus_gate_source_balanced_ci95_pp"][0], final["fedcanto_minus_gate_source_balanced_ci95_pp"][0], raw["canto_minus_router_ci95_pp"][0]]
-    hi = [final["router_minus_gate_source_balanced_ci95_pp"][1], final["fedcanto_minus_gate_source_balanced_ci95_pp"][1], raw["canto_minus_router_ci95_pp"][1]]
-    names2 = ["Router − Gate", "CANTO − Gate", "Raw CANTO − Router"]
+    values = [final["router_minus_gate_source_balanced_pp"], final["fedperg_minus_gate_source_balanced_pp"], raw["perg_minus_router_pp"]]
+    lo = [final["router_minus_gate_source_balanced_ci95_pp"][0], final["fedperg_minus_gate_source_balanced_ci95_pp"][0], raw["perg_minus_router_ci95_pp"][0]]
+    hi = [final["router_minus_gate_source_balanced_ci95_pp"][1], final["fedperg_minus_gate_source_balanced_ci95_pp"][1], raw["perg_minus_router_ci95_pp"][1]]
+    names2 = ["Router − Gate", "PERG − Gate", "Raw PERG − Router"]
     err = np.vstack([np.array(values)-np.array(lo), np.array(hi)-np.array(values)])
     ax.errorbar(np.arange(3), values, yerr=err, fmt="o", color=RED, capsize=4, lw=2)
     ax.axhline(0, color="#4D4D4D", ls="--", lw=1); ax.set_xticks(np.arange(3), names2, rotation=28, ha="right")
     ax.set_ylabel("AUC effect (pp) ↑")
     panel(ax, "f", "Confirmatory effects (95% CI)")
 
-    handles = [mpl.lines.Line2D([], [], color=RED, marker="o", label="FedCANTO evidence path"),
+    handles = [mpl.lines.Line2D([], [], color=RED, marker="o", label="FedPERG evidence path"),
                mpl.lines.Line2D([], [], color=BLUE, marker="s", label="Matched diagnostic")]
     fig.legend(handles=handles, loc="lower center", ncol=2, frameon=False, bbox_to_anchor=(.5, -.015))
     fig.subplots_adjust(left=.08, right=.99, top=.93, bottom=.18, wspace=.48, hspace=.48)

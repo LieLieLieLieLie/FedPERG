@@ -6,13 +6,13 @@ import argparse
 import itertools
 from pathlib import Path
 
-from fedcanto.config import ExperimentConfig
-from fedcanto.trainer import FederatedExperiment
+from fedperg.config import ExperimentConfig
+from fedperg.trainer import FederatedExperiment
 
 ROOT = Path(__file__).resolve().parent
 DATASETS = ("cifar10", "cifar100", "officehome")
 REGIMES = ("label_skew", "quantity_skew", "compound")
-METHODS = (("FedAvgM-Gate", "full"), ("FedCANTO", "lite_gate_bank_selector"))
+METHODS = (("FedAvgM-Gate", "full"), ("FedPERG", "lite_gate_bank_selector"))
 TAG = "round13_frozen_public_gate_confirmation"
 
 
@@ -26,8 +26,8 @@ def main() -> None:
     for index, (dataset, regime, method, variant, seed) in enumerate(jobs, 1):
         cfg = ExperimentConfig(
             dataset=dataset, regime=regime, method=method, seed=seed,
-            rounds=30, canto_variant=variant, canto_meta_steps=1,
-            canto_gate_low=0.82, canto_gate_span=0.32,
+            rounds=30, perg_variant=variant, perg_meta_steps=1,
+            perg_gate_low=0.82, perg_gate_span=0.32,
             client_validation_fraction=0.0, selector_calibration=True,
             selector_margin=0.001, experiment_tag=TAG, device=args.device,
         ).resolved(ROOT)

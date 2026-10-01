@@ -27,7 +27,7 @@ def read(path: Path) -> dict:
 
 
 def run_path(dataset: str, regime: str, seed: int, variant: str, tag: str) -> Path:
-    return MODELS / f"{dataset}__{regime}__fedcanto__s{seed}__{variant}__{tag}.json"
+    return MODELS / f"{dataset}__{regime}__fedperg__s{seed}__{variant}__{tag}.json"
 
 
 def q(values: list[float], p: float) -> float:
@@ -145,25 +145,25 @@ def main() -> None:
                           full["history"][-1]["elapsed_seconds"])
             values = {"AvgM+Gate": time_auc(gate, horizon),
                       "Router-only": time_auc(router, horizon),
-                      "FedCANTO": time_auc(full, horizon)}
+                      "FedPERG": time_auc(full, horizon)}
             time_rows.append({"dataset": dataset, "regime": regime, "seed": seed,
                               "horizon_s": horizon, **values,
-                              "canto_minus_gate": values["FedCANTO"] - values["AvgM+Gate"],
-                              "canto_minus_router": values["FedCANTO"] - values["Router-only"]})
-    time_gate = source_balanced_by_seed(time_rows, "canto_minus_gate")
-    time_router = source_balanced_by_seed(time_rows, "canto_minus_router")
+                              "perg_minus_gate": values["FedPERG"] - values["AvgM+Gate"],
+                              "perg_minus_router": values["FedPERG"] - values["Router-only"]})
+    time_gate = source_balanced_by_seed(time_rows, "perg_minus_gate")
+    time_router = source_balanced_by_seed(time_rows, "perg_minus_router")
 
     # Raw-MNIST common-horizon time AUC.
     raw_rows = []
     for seed in range(60, 65):
         gate = read(MODELS / f"mnist__label_skew__fedavgm_gate__s{seed}__round14_raw_final_paired.json")
-        router = read(MODELS / f"mnist__label_skew__fedcanto__s{seed}__lite_paired_gate_bank_router_control__round14_raw_final_paired.json")
-        full = read(MODELS / f"mnist__label_skew__fedcanto__s{seed}__lite_paired_gate_bank_selector__round14_raw_final_paired.json")
+        router = read(MODELS / f"mnist__label_skew__fedperg__s{seed}__lite_paired_gate_bank_router_control__round14_raw_final_paired.json")
+        full = read(MODELS / f"mnist__label_skew__fedperg__s{seed}__lite_paired_gate_bank_selector__round14_raw_final_paired.json")
         horizon = min(x["history"][-1]["elapsed_seconds"] for x in (gate, router, full))
         g, r, f = (time_auc(x, horizon) for x in (gate, router, full))
         raw_rows.append({"seed": seed, "horizon_s": horizon, "AvgM+Gate": g,
-                         "Router-only": r, "FedCANTO": f,
-                         "canto_minus_gate": f-g, "canto_minus_router": f-r})
+                         "Router-only": r, "FedPERG": f,
+                         "perg_minus_gate": f-g, "perg_minus_router": f-r})
 
     TABLES.mkdir(parents=True, exist_ok=True)
     import csv
@@ -203,12 +203,12 @@ def main() -> None:
         },
         "time_auc": {
             "definition": "accuracy-time area divided by the fastest method's paired common horizon",
-            "fixed_source_balanced_canto_minus_gate_pp": mean(time_gate.values()),
-            "fixed_source_balanced_canto_minus_gate_ci95_pp": boot_ci(list(time_gate.values()), 1502),
-            "fixed_source_balanced_canto_minus_router_pp": mean(time_router.values()),
-            "fixed_source_balanced_canto_minus_router_ci95_pp": boot_ci(list(time_router.values()), 1503),
-            "raw_canto_minus_gate_pp": mean(x["canto_minus_gate"] for x in raw_rows),
-            "raw_canto_minus_router_pp": mean(x["canto_minus_router"] for x in raw_rows),
+            "fixed_source_balanced_perg_minus_gate_pp": mean(time_gate.values()),
+            "fixed_source_balanced_perg_minus_gate_ci95_pp": boot_ci(list(time_gate.values()), 1502),
+            "fixed_source_balanced_perg_minus_router_pp": mean(time_router.values()),
+            "fixed_source_balanced_perg_minus_router_ci95_pp": boot_ci(list(time_router.values()), 1503),
+            "raw_perg_minus_gate_pp": mean(x["perg_minus_gate"] for x in raw_rows),
+            "raw_perg_minus_router_pp": mean(x["perg_minus_router"] for x in raw_rows),
         },
     }
     (MODELS / "round15_rereview_statistics.json").write_text(

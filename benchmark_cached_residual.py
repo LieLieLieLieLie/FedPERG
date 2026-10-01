@@ -1,8 +1,8 @@
-"""Numerical-equivalence and synchronized GPU benchmark for cached FedCANTO.
+"""Numerical-equivalence and synchronized GPU benchmark for cached FedPERG.
 
 The tensor profiles match the fixed-feature classifiers used by the three
 primary sources and the 20-tensor raw-MNIST CNN.  Both paths execute the full
-FedCANTO server aggregation; only the leave-one residual implementation is
+FedPERG server aggregation; only the leave-one residual implementation is
 swapped.  Results are written under ``results/{tables,models}``.
 """
 
@@ -18,8 +18,8 @@ import numpy as np
 import torch
 from torch import Tensor
 
-import fedcanto.aggregators as aggregators
-from fedcanto.aggregators import CANTOAggregator, cached_leave_one_residual
+import fedperg.aggregators as aggregators
+from fedperg.aggregators import PERGAggregator, cached_leave_one_residual
 
 
 ROOT = Path(__file__).resolve().parent
@@ -78,7 +78,7 @@ def aggregate_once(profile: str, clients: int, device: torch.device,
     aggregators.cached_leave_one_residual = residual_fn
     try:
         torch.manual_seed(20260927)
-        server = CANTOAggregator(reference, 48, 4, 3e-3, 4, 0.30, device,
+        server = PERGAggregator(reference, 48, 4, 3e-3, 4, 0.30, device,
                                  variant="lite_simple_residual")
         output = server.aggregate(deltas, mass, improvement, 1)
         server.update_predictor(deltas, mass, improvement, 1)
@@ -103,7 +103,7 @@ def benchmark(profile: str, clients: int, device: torch.device,
         aggregators.cached_leave_one_residual = residual_fn
         try:
             torch.manual_seed(20260927)
-            server = CANTOAggregator(reference, 48, 4, 3e-3, 4, 0.30, device,
+            server = PERGAggregator(reference, 48, 4, 3e-3, 4, 0.30, device,
                                      variant="lite_simple_residual")
             for step in range(warmup + repeats):
                 if device.type == "cuda":
@@ -153,7 +153,7 @@ def main() -> None:
         writer.writeheader()
         writer.writerows(rows)
     payload = {
-        "purpose": "pre-cache direct versus algebraically cached final FedCANTO",
+        "purpose": "pre-cache direct versus algebraically cached final FedPERG",
         "synchronization": "torch.cuda.synchronize before and after each timed aggregation",
         "rows": rows,
     }

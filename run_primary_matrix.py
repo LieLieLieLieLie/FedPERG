@@ -6,8 +6,8 @@ import argparse
 import itertools
 from pathlib import Path
 
-from fedcanto.config import ExperimentConfig
-from fedcanto.trainer import FederatedExperiment
+from fedperg.config import ExperimentConfig
+from fedperg.trainer import FederatedExperiment
 
 ROOT = Path(__file__).resolve().parent
 DATASETS = ("cifar10", "cifar100", "officehome")

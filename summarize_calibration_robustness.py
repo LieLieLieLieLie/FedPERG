@@ -18,7 +18,7 @@ TAG = "round14_calibration_robustness"
 
 
 def load(dataset: str, regime: str, variant: str, suffix: str, seed: int) -> dict:
-    path = MODELS / (f"{dataset}__{regime}__fedcanto__s{seed}__{variant}__"
+    path = MODELS / (f"{dataset}__{regime}__fedperg__s{seed}__{variant}__"
                      f"{TAG}_{suffix}.json")
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -30,8 +30,8 @@ def main() -> None:
             suffix = f"p{int(100*fraction):02d}_{shift}"
             for seed in range(40, 45):
                 router = load(dataset, regime, "lite_paired_gate_bank_router_control", suffix, seed)
-                canto = load(dataset, regime, "lite_paired_gate_bank_selector", suffix, seed)
-                diagnostics = canto["diagnostics"]
+                perg = load(dataset, regime, "lite_paired_gate_bank_selector", suffix, seed)
+                diagnostics = perg["diagnostics"]
                 selected_evidence = []
                 calibration_gains = []
                 test_gains = []
@@ -53,8 +53,8 @@ def main() -> None:
                 rows.append({
                     "dataset": dataset, "fraction": fraction, "shift": shift, "seed": seed,
                     "router_auc_pct": 100 * router["final"]["convergence_auc"],
-                    "fedcanto_auc_pct": 100 * canto["final"]["convergence_auc"],
-                    "canto_minus_router_pp": 100 * (canto["final"]["convergence_auc"] -
+                    "fedperg_auc_pct": 100 * perg["final"]["convergence_auc"],
+                    "perg_minus_router_pp": 100 * (perg["final"]["convergence_auc"] -
                                                       router["final"]["convergence_auc"]),
                     "evidence_selection_rate": mean(selected_evidence),
                     "mean_calibration_loss_gain": mean(calibration_gains),
@@ -67,10 +67,10 @@ def main() -> None:
     summary = []
     for fraction, shift in CONDITIONS:
         cells = [x for x in rows if x["fraction"] == fraction and x["shift"] == shift]
-        effects = [x["canto_minus_router_pp"] for x in cells]
+        effects = [x["perg_minus_router_pp"] for x in cells]
         summary.append({
             "fraction": fraction, "shift": shift,
-            "canto_minus_router_pp": mean(effects), "effect_sd_pp": stdev(effects),
+            "perg_minus_router_pp": mean(effects), "effect_sd_pp": stdev(effects),
             "positive_pairs": sum(x > 0 for x in effects),
             "evidence_selection_rate": mean(x["evidence_selection_rate"] for x in cells),
             "calibration_loss_gain": mean(x["mean_calibration_loss_gain"] for x in cells),

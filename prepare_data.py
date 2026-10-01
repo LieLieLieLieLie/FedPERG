@@ -1,4 +1,4 @@
-"""Download public datasets and build the frozen feature caches used by FedCANTO.
+"""Download public datasets and build the frozen feature caches used by FedPERG.
 
 CIFAR-10, CIFAR-100, and MNIST are downloaded through torchvision. Office-Home
 must be downloaded from its official site and extracted locally because its

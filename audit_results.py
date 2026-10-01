@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from fedcanto.config import DATASETS, METHODS, REGIMES
+from fedperg.config import DATASETS, METHODS, REGIMES
 
 
 ROOT = Path(__file__).resolve().parent
@@ -14,7 +14,7 @@ MODELS = ROOT / "results" / "models"
 TABLES = ROOT / "results" / "tables"
 FORMAL_DATASETS = ["cifar10", "cifar100", "officehome"]
 PAPER_METHODS = ["FedAvg", "FedAvgM", "SCAFFOLD", "FedAdam", "FedLAW",
-                 "FedCDA", "FedPW", "Fed-NGA", "FedPhoenix", "FedCANTO"]
+                 "FedCDA", "FedPW", "Fed-NGA", "FedPhoenix", "FedPERG"]
 TABLES.mkdir(parents=True, exist_ok=True)
 
 
@@ -32,14 +32,14 @@ def load_runs() -> pd.DataFrame:
         cfg = run.get("config", {})
         if cfg.get("rounds") != 30 or cfg.get("clients") != 20 or cfg.get("clients_per_round") != 8:
             continue
-        if cfg.get("method") == "FedCANTO":
-            if (cfg.get("canto_variant") != "lite_paired_gate_bank_selector" or
+        if cfg.get("method") == "FedPERG":
+            if (cfg.get("perg_variant") != "lite_paired_gate_bank_selector" or
                     cfg.get("experiment_tag") != "round14_final_breadth_update" or
                     cfg.get("seed") not in range(20, 23)):
                 continue
         else:
             if (cfg.get("method") not in PAPER_METHODS or
-                    cfg.get("canto_variant", "full") != "full" or
+                    cfg.get("perg_variant", "full") != "full" or
                     cfg.get("experiment_tag") != "round13_public_ten_method_matrix" or
                     cfg.get("seed") not in range(20, 23)):
                 continue
@@ -121,12 +121,12 @@ def main() -> None:
         "mean_ece": df.groupby("method")["ece"].mean().sort_values().to_dict(),
         "mean_auc": df.groupby("method")["convergence_auc"].mean().sort_values(ascending=False).to_dict(),
         "rank_summary": rank_summary.to_dict(orient="records"),
-        "fedcanto_task_accuracy": means[means.method == "FedCANTO"].to_dict(orient="records"),
+        "fedperg_task_accuracy": means[means.method == "FedPERG"].to_dict(orient="records"),
         "gate": {
-            "accuracy_rank": int(df.groupby("method")["accuracy"].mean().rank(ascending=False)["FedCANTO"]),
-            "worst20_rank": int(df.groupby("method")["worst20_accuracy"].mean().rank(ascending=False)["FedCANTO"]),
-            "auc_rank": int(df.groupby("method")["convergence_auc"].mean().rank(ascending=False)["FedCANTO"]),
-            "ece_rank": int(df.groupby("method")["ece"].mean().rank(ascending=True)["FedCANTO"]),
+            "accuracy_rank": int(df.groupby("method")["accuracy"].mean().rank(ascending=False)["FedPERG"]),
+            "worst20_rank": int(df.groupby("method")["worst20_accuracy"].mean().rank(ascending=False)["FedPERG"]),
+            "auc_rank": int(df.groupby("method")["convergence_auc"].mean().rank(ascending=False)["FedPERG"]),
+            "ece_rank": int(df.groupby("method")["ece"].mean().rank(ascending=True)["FedPERG"]),
         },
     }
     (MODELS / "aggregate_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")

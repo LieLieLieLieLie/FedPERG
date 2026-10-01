@@ -6,13 +6,13 @@ import argparse
 import itertools
 from pathlib import Path
 
-from fedcanto.config import ExperimentConfig
-from fedcanto.trainer import FederatedExperiment
+from fedperg.config import ExperimentConfig
+from fedperg.trainer import FederatedExperiment
 
 ROOT = Path(__file__).resolve().parent
 METHODS = (("AvgM+Gate", "FedAvgM-Gate", "full"),
-           ("Router-only", "FedCANTO", "lite_paired_gate_bank_router_control"),
-           ("FedCANTO", "FedCANTO", "lite_paired_gate_bank_selector"))
+           ("Router-only", "FedPERG", "lite_paired_gate_bank_router_control"),
+           ("FedPERG", "FedPERG", "lite_paired_gate_bank_selector"))
 TAG = "round14_raw_final_paired"
 
 
@@ -25,8 +25,8 @@ def main() -> None:
         cfg = ExperimentConfig(
             dataset="mnist", regime="label_skew", method=method, seed=seed,
             rounds=100, architecture="raw_cnn", local_lr=.025, batch_size=128,
-            canto_variant=variant, canto_meta_steps=1,
-            canto_gate_low=.82, canto_gate_span=.32,
+            perg_variant=variant, perg_meta_steps=1,
+            perg_gate_low=.82, perg_gate_span=.32,
             selector_calibration=True, selector_margin=.001,
             experiment_tag=TAG, device=args.device,
         ).resolved(ROOT)

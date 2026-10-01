@@ -1,4 +1,4 @@
-"""Run the frozen FedCANTO experiment suites and regenerate reported artifacts."""
+"""Run the frozen FedPERG experiment suites and regenerate reported artifacts."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parent
 STAGES = {
     "primary": (
         "run_primary_matrix.py",
-        "run_primary_fedcanto.py",
+        "run_primary_fedperg.py",
     ),
     "attribution": (
         "run_gate_reference.py",

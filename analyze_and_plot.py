@@ -16,7 +16,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from scipy.stats import spearmanr
 
 from audit_results import load_runs
-from fedcanto.config import METHODS
+from fedperg.config import METHODS
 
 
 ROOT = Path(__file__).resolve().parent
@@ -33,13 +33,13 @@ OUR = "#FF6666"
 # The ten algorithms in the journal-facing comparison are fixed by mechanism
 # coverage. Diagnostic variants are controls, not additional baseline methods.
 PAPER_METHODS = ["FedAvg", "FedAvgM", "SCAFFOLD", "FedAdam", "FedLAW",
-                 "FedCDA", "FedPW", "Fed-NGA", "FedPhoenix", "FedCANTO"]
+                 "FedCDA", "FedPW", "Fed-NGA", "FedPhoenix", "FedPERG"]
 COLORS = dict(zip(PAPER_METHODS, ["#FFAA53", "#50CC55", "#3399FF", "#6666FF",
                                   "#9933FF", "#00DDDD", "#4D4D4D", "#B8860B",
                                   "#D65DB1", OUR]))
 MARKERS = ["o", "s", "^", "D", "v", "P", "X", "<", ">", "h", "*", "p", "8"]
 METHOD_LABELS = {m: m for m in PAPER_METHODS}
-METHOD_LABELS["FedCANTO"] = "FedCANTO"
+METHOD_LABELS["FedPERG"] = "FedPERG"
 DATA_LABELS = {"cifar10": "CIFAR-10", "cifar100": "CIFAR-100", "officehome": "Office-Home-65"}
 REGIME_LABELS = {"label_skew": "Label skew", "quantity_skew": "Quantity skew", "compound": "Compound"}
 RED = LinearSegmentedColormap.from_list("white_red", ["#FFFFFF", "#FF4F4F"])
@@ -84,8 +84,8 @@ def formal_json(dataset: str, regime: str, method: str, seed: int) -> Dict:
     actual_seed = seed + 20
     name = (f"{dataset}__{regime}__{method.lower().replace('-', '_')}__s{actual_seed}"
             "__round13_public_ten_method_matrix.json")
-    if method == "FedCANTO":
-        name = (f"{dataset}__{regime}__fedcanto__s{actual_seed}__lite_paired_gate_bank_selector"
+    if method == "FedPERG":
+        name = (f"{dataset}__{regime}__fedperg__s{actual_seed}__lite_paired_gate_bank_selector"
                 "__round14_final_breadth_update.json")
     return json.loads((MODELS / name).read_text(encoding="utf-8"))
 
@@ -108,13 +108,13 @@ def extended_runs(tag_prefix: str = "") -> List[Dict]:
         if not isinstance(record, dict):
             continue
         tag = record.get("config", {}).get("experiment_tag", "")
-        variant = record.get("config", {}).get("canto_variant", "full")
+        variant = record.get("config", {}).get("perg_variant", "full")
         if tag.startswith("round3_wholeclient_fig5_"):
             record["config"]["experiment_tag"] = tag[len("round3_wholeclient_fig5_"):]
             tag = record["config"]["experiment_tag"]
         elif tag.startswith(("revision_fig5_", "round3_final_fig5_")):
             continue
-        elif (record.get("config", {}).get("method") == "FedCANTO" and
+        elif (record.get("config", {}).get("method") == "FedPERG" and
               tag.startswith(("sensitivity_", "stress_", "scale_"))):
             continue
         if tag_prefix and not tag.startswith(tag_prefix):
@@ -142,7 +142,7 @@ def plot_convergence() -> Path:
             mean, std = values.mean(0), values.std(0)
             ax.fill_between(rounds, mean - std, mean + std, color=COLORS[method],
                             alpha=0.18, linewidth=0, zorder=1)
-            ax.plot(rounds, mean, color=COLORS[method], lw=2.4 if method == "FedCANTO" else 1.5,
+            ax.plot(rounds, mean, color=COLORS[method], lw=2.4 if method == "FedPERG" else 1.5,
                     marker=MARKERS[method_idx], ms=3.2, markevery=3,
                     label=METHOD_LABELS[method], zorder=2)
         dataset_short = {"cifar10": "C10", "cifar100": "C100", "officehome": "OH-65"}[dataset]
@@ -174,7 +174,7 @@ def plot_evaluation() -> Path:
     short_methods = {"FedAvg": "Avg", "FedAvgM": "AvgM", "SCAFFOLD": "SCAF",
                      "FedAdam": "Adam", "FedLAW": "LAW", "FedCDA": "CDA",
                      "FedPW": "PW", "Fed-NGA": "NGA", "FedPhoenix": "Phoenix",
-                     "FedCANTO": "CANTO"}
+                     "FedPERG": "PERG"}
     fig, axes = plt.subplots(2, 3, figsize=(12.4, 7.45))
 
     # (a) Distribution + quartiles + mean/95% CI: substantially richer than a
@@ -225,7 +225,7 @@ def plot_evaluation() -> Path:
             means = df[df.method.isin(methods)].groupby("method")[metric].mean()
             ranks.append(float(means.rank(ascending=not high, method="average")[method]))
         ax.plot(x, ranks, color=COLORS[method], marker=MARKERS[index], ms=4,
-                lw=2.2 if method == "FedCANTO" else 1.15, label=METHOD_LABELS[method])
+                lw=2.2 if method == "FedPERG" else 1.15, label=METHOD_LABELS[method])
     ax.set_xticks(x, [label for _, _, label in rank_metrics], rotation=28, ha="right")
     ax.set_ylabel("Mean method rank (1 = best) ↓")
     ax.set_ylim(10.6, .4)
@@ -234,12 +234,12 @@ def plot_evaluation() -> Path:
     # (d) Paired-effect ECDFs preserve every task/seed rather than collapsing
     # them into a bar.
     ax = axes[1, 0]
-    competitors = [m for m in methods if m != "FedCANTO"]
+    competitors = [m for m in methods if m != "FedPERG"]
     for method in competitors:
         gains = []
         for dataset, regime in tasks:
             for seed in [20, 21, 22]:
-                ours = float(df[(df.method == "FedCANTO") & (df.dataset == dataset) &
+                ours = float(df[(df.method == "FedPERG") & (df.dataset == dataset) &
                                 (df.regime == regime) & (df.seed == seed)]["convergence_auc"].iloc[0])
                 other = float(df[(df.method == method) & (df.dataset == dataset) &
                                  (df.regime == regime) & (df.seed == seed)]["convergence_auc"].iloc[0])
@@ -249,7 +249,7 @@ def plot_evaluation() -> Path:
                 where="post", lw=1.35, color=COLORS[method], alpha=.9,
                 label=METHOD_LABELS[method])
     ax.axvline(0, color="#222222", lw=1, ls="--")
-    ax.set_xlabel("FedCANTO AUC gain (percentage points) ↑")
+    ax.set_xlabel("FedPERG AUC gain (percentage points) ↑")
     ax.set_ylabel("Empirical CDF (fraction)")
     panel(ax, "d", "Paired AUC-gain ECDF", x=-0.12)
 
@@ -267,8 +267,8 @@ def plot_evaluation() -> Path:
                     xerr=sem.loc[method, "aggregation_ms"], yerr=100 * sem.loc[method, "auc"],
                     fmt=MARKERS[index], ms=np.sqrt(sizes.loc[method]), color=COLORS[method],
                     ecolor=COLORS[method], alpha=.9, capsize=2.5, zorder=3)
-        if method == "FedCANTO":
-            ax.annotate("CANTO", (means.loc[method, "aggregation_ms"],
+        if method == "FedPERG":
+            ax.annotate("PERG", (means.loc[method, "aggregation_ms"],
                         100 * means.loc[method, "auc"]), xytext=(-7, 3),
                         textcoords="offset points", fontsize=11, ha="right")
     # This attribution-critical control is intentionally shown separately and
@@ -317,7 +317,7 @@ def plot_evaluation() -> Path:
         win = tie = loss = 0
         for metric, high in compare_metrics:
             for dataset, regime in tasks:
-                ours = float(df[(df.method == "FedCANTO") & (df.dataset == dataset) &
+                ours = float(df[(df.method == "FedPERG") & (df.dataset == dataset) &
                                 (df.regime == regime)][metric].mean())
                 other = float(df[(df.method == method) & (df.dataset == dataset) &
                                  (df.regime == regime)][metric].mean())
@@ -339,7 +339,7 @@ def plot_evaluation() -> Path:
     ax.set_xlabel("Task–metric outcomes (%)")
     ax.legend(frameon=True, framealpha=.86, ncol=1, loc="lower right",
               fontsize=11, borderpad=.35, labelspacing=.25, handlelength=1.4)
-    panel(ax, "f", "FedCANTO outcomes\nby baseline", x=-0.12)
+    panel(ax, "f", "FedPERG outcomes\nby baseline", x=-0.12)
 
     handles = [plt.Line2D([0], [0], color=COLORS[m], marker=MARKERS[i], lw=1.8,
                           label=METHOD_LABELS[m]) for i, m in enumerate(methods)]
@@ -362,13 +362,13 @@ def plot_sensitivity_stress() -> Path:
     fig, axes = plt.subplots(2, 3, figsize=(12.6, 7.35))
 
     # Panels (a,b) are deliberately method-specific: rho and the residual
-    # coefficient are parameters of FedCANTO and have no counterpart in the
+    # coefficient are parameters of FedPERG and have no counterpart in the
     # baselines.  The other four panels compare all ten primary algorithms.
     for ax, prefix, xlabel, letter, title in [
         (axes[0, 0], "round6_fig5_rho_", "Conservative budget $\\rho$ (fraction)",
-         "a", "FedCANTO budget sensitivity"),
+         "a", "FedPERG budget sensitivity"),
         (axes[0, 1], "round6_fig5_residual_", "Residual coefficient $\\lambda_{\\rm res}$ (fraction)",
-         "b", "FedCANTO residual sensitivity"),
+         "b", "FedPERG residual sensitivity"),
     ]:
         records = []
         for run in runs:
@@ -411,9 +411,9 @@ def plot_sensitivity_stress() -> Path:
             x = (100 * stats.x if percent_x else stats.x).to_numpy()
             mean = stats["mean"].to_numpy(); std = stats["std"].fillna(0).to_numpy()
             ax.fill_between(x, mean - std, mean + std, color=COLORS[method],
-                            alpha=.07 if method != "FedCANTO" else .15, lw=0)
+                            alpha=.07 if method != "FedPERG" else .15, lw=0)
             ax.plot(x, mean, color=COLORS[method], marker=MARKERS[idx], ms=4.2,
-                    lw=2.4 if method == "FedCANTO" else 1.25,
+                    lw=2.4 if method == "FedPERG" else 1.25,
                     label=METHOD_LABELS[method])
         ax.set_xlabel(xlabel)
         ax.set_ylabel("Global accuracy (%) ↑")
@@ -440,7 +440,7 @@ def plot_sensitivity_stress() -> Path:
 
 
 def plot_operator_diagnostics() -> Path:
-    run = formal_json("officehome", "compound", "FedCANTO", 0)
+    run = formal_json("officehome", "compound", "FedPERG", 0)
     diagnostics = run["diagnostics"]
     last = diagnostics[-1]
     weights = np.asarray(last["weights_by_layer"])
@@ -573,7 +573,7 @@ def write_tables() -> None:
     pivot.to_csv(TABLES / "main_accuracy_pivot.csv", float_format="%.6f")
 
     # Matched ablation summaries are generated from the frozen result records. Never
-    # mix final-protocol FedCANTO with legacy same-round ablation logs.
+    # mix final-protocol FedPERG with legacy same-round ablation logs.
     # Remove intermediate tabulations that duplicate plotted endpoints.
     for duplicate in [TABLES / "main_results.csv", TABLES / "rank_summary.csv"]:
         if duplicate.exists():

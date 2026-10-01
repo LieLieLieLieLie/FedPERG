@@ -1,7 +1,7 @@
-# FedCANTO
+# FedPERG
 
-Official research implementation of **FedCANTO: Paired Evidence-Routed Gate
-Fusion for Heterogeneous Federated Learning**. FedCANTO constructs a
+Official research implementation of **FedPERG: Auditable Paired Evidence-Routed
+Gate Fusion under Federated Heterogeneity**. FedPERG constructs a
 client--tensor evidence map and uses a fixed-margin router to choose among
 span-matched, sign-preserving gated aggregates.
 
@@ -15,8 +15,8 @@ The reported experiments were executed with Python 3.9, PyTorch 2.0, and an
 NVIDIA CUDA GPU. A clean environment can be prepared as follows:
 
 ```bash
-conda create -n fedcanto python=3.9 -y
-conda activate fedcanto
+conda create -n fedperg python=3.9 -y
+conda activate fedperg
 pip install -r requirements.txt
 ```
 
@@ -111,7 +111,7 @@ frozen protocol documents for the precise estimands and interpretation limits.
 ## Repository structure
 
 ```text
-fedcanto/          core models, aggregation operators, data partitions, trainer
+fedperg/          core models, aggregation operators, data partitions, trainer
 tests/             permutation-equivariance and masking invariants
 protocols/         descriptive frozen protocols for the reported experiments
 prepare_data.py    official-data download and feature-cache construction
@@ -124,7 +124,7 @@ audit_results.py   result-integrity and paired-design audit
 
 ## License and research integrity
 
-The code is released under the **FedCANTO Academic Evaluation License 1.0** for
+The code is released under the **FedPERG Academic Evaluation License 1.0** for
 non-commercial evaluation and result reproduction during manuscript review. It
 is source-available, not OSI-approved open-source software. Reuse requires clear
 attribution; redistribution, rebranding, commercial use, or presenting the

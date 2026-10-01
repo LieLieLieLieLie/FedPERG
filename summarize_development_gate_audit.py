@@ -59,20 +59,20 @@ def main() -> None:
         for seed in range(20, 30):
             prefix = f"{dataset}__{regime}"
             gate = read(MODELS / f"{prefix}__fedavgm_gate__s{seed}__{TAG}.json")
-            canto = read(MODELS / (f"{prefix}__fedcanto__s{seed}__lite_gate_bank_selector__"
+            perg = read(MODELS / (f"{prefix}__fedperg__s{seed}__lite_gate_bank_selector__"
                                    f"{TAG}.json"))
-            effect = 100 * (canto["final"]["convergence_auc"] - gate["final"]["convergence_auc"])
-            selected = sum(d.get("selector_used_evidence", False) for d in canto["diagnostics"])
+            effect = 100 * (perg["final"]["convergence_auc"] - gate["final"]["convergence_auc"])
+            selected = sum(d.get("selector_used_evidence", False) for d in perg["diagnostics"])
             rows.append({
                 "dataset": dataset, "regime": regime, "seed": seed,
                 "gate_auc_pct": 100 * gate["final"]["convergence_auc"],
-                "fedcanto_auc_pct": 100 * canto["final"]["convergence_auc"],
+                "fedperg_auc_pct": 100 * perg["final"]["convergence_auc"],
                 "paired_auc_delta_pp": effect,
                 "gate_final_accuracy_pct": 100 * gate["final"]["accuracy"],
-                "fedcanto_final_accuracy_pct": 100 * canto["final"]["accuracy"],
+                "fedperg_final_accuracy_pct": 100 * perg["final"]["accuracy"],
                 "evidence_rounds": selected,
                 "gate_runtime_s": gate["runtime_seconds"],
-                "fedcanto_runtime_s": canto["runtime_seconds"],
+                "fedperg_runtime_s": perg["runtime_seconds"],
             })
     run_path = TABLES / "round13_frozen_public_gate_confirmation_runs.csv"
     with run_path.open("w", newline="", encoding="utf-8") as f:
@@ -84,7 +84,7 @@ def main() -> None:
         summaries.append({
             "dataset": dataset, "regime": regime,
             "gate_auc_mean_pct": mean(x["gate_auc_pct"] for x in task),
-            "fedcanto_auc_mean_pct": mean(x["fedcanto_auc_pct"] for x in task),
+            "fedperg_auc_mean_pct": mean(x["fedperg_auc_pct"] for x in task),
             "paired_delta_mean_pp": mean(effects), "paired_delta_sd_pp": stdev(effects),
             "paired_delta_ci_low_pp": low, "paired_delta_ci_high_pp": high,
             "positive_seeds": sum(x > 0 for x in effects),
