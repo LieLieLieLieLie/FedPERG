@@ -3,7 +3,7 @@
 This protocol was fixed before seeds 50--59 were executed. The sources are
 CIFAR-10, CIFAR-100, and Office-Home under all three heterogeneity regimes plus
 frozen MobileNetV3/MNIST under compound heterogeneity. AvgM+Gate, Router-only,
-FedCANTO, and the leave-one-residual ablation share data, client sampling,
+FedPERG, and the leave-one-residual ablation share data, client sampling,
 local optimization, incoming momentum, seven candidate spans, seven calibration
 forwards, the 0.001 margin, and the disjoint 4% server calibration pool.
 
