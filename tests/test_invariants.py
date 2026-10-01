@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import torch
 
-from fedcanto.aggregators import ClientLayerSetOperator
+from fedperg.aggregators import ClientLayerSetOperator
 
 
 def test_client_permutation_equivariance() -> None:
