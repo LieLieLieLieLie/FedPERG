@@ -45,8 +45,10 @@ reproduce.py
 ```
 
 Superseded CPU experiments, their results and obsolete reporting entry points
-are excluded. R0 is an untouched submission archive. Its existing dataset caches
-are shared read-only by the local R1 runs; all R1 outputs stay under R1.
+are excluded. In the local manuscript workspace, `../R0` is an untouched source
+archive whose data caches are shared read-only; all R1 outputs stay under R1.
+In the public repository, `R0/` is reserved and initially empty. Prepare its
+`data/` cache from the official sources below before running experiments.
 
 ## Reproduction
 
