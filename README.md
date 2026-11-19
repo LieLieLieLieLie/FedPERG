@@ -1,132 +1,34 @@
 # FedPERG
 
-Official research implementation of **FedPERG: Auditable Paired Evidence-Routed
-Gate Fusion under Federated Heterogeneity**. FedPERG constructs a
-client--tensor evidence map and uses a fixed-margin router to choose among
-span-matched, sign-preserving gated aggregates.
+**FedPERG: Auditable Paired Evidence-Routed Gate Fusion under Federated Heterogeneity**
 
-This repository contains the frozen implementation and experiment scripts used
-for the submitted manuscript. Third-party datasets, derived feature caches, and
-generated results are intentionally not redistributed.
+This repository separates the original submitted implementation from the current revision so that reviewers can select the relevant version.
 
-## Environment
+## Versions
 
-The reported experiments were executed with Python 3.9, PyTorch 2.0, and an
-NVIDIA CUDA GPU. A clean environment can be prepared as follows:
+- [`R0_0/`](R0_0/): the complete repository snapshot uploaded for the initial submission, preserved without changing its file contents.
+- `R0/`: a reserved version directory, currently containing only a placeholder. It is not the revised implementation.
+- [`R1/`](R1/): the revised implementation, experiment protocols, tests and reporting code corresponding to the current revision. Start here to reproduce the revised study.
 
-```bash
-conda create -n fedperg python=3.9 -y
-conda activate fedperg
-pip install -r requirements.txt
-```
+The original snapshot remains available in Git history as well. Its historical README describes that snapshot; use the R1 instructions for the revised study.
 
-CUDA is the default for experiment scripts. Use `--device cpu` only for a
-functional check; the complete matrix is intended for GPU execution. Random
-seeds, client counts, participation rates, communication rounds, heterogeneity
-settings, and method-specific frozen parameters are defined in the respective
-`run_*.py` scripts and protocol files.
-
-## Data download and feature preparation
-
-Obtain the raw datasets only from their official sources:
-
-- [CIFAR-10 and CIFAR-100](https://www.cs.toronto.edu/~kriz/cifar.html)
-- [CIFAR-10-C](https://zenodo.org/records/2535967) and
-  [CIFAR-100-C](https://zenodo.org/records/3555552)
-- [Office-Home](https://www.hemanthdv.org/officeHomeDataset.html)
-- [MNIST](https://yann.lecun.com/exdb/mnist/)
-
-`prepare_data.py` downloads the clean CIFAR training sets and MNIST through
-torchvision and constructs the frozen ImageNet-backbone feature caches expected
-by the experiments. Download and extract CIFAR-10-C and CIFAR-100-C separately;
-their multi-gigabyte archives are not fetched implicitly. Office-Home must be
-downloaded and extracted so that the given directory contains `Art`, `Clipart`,
-`Product`, and `Real World`.
+## Reproduce R1
 
 ```bash
-python prepare_data.py --dataset cifar10 --cifar-c-root "D:/datasets" --device cuda
-python prepare_data.py --dataset cifar100 --cifar-c-root "D:/datasets" --device cuda
-python prepare_data.py --dataset mnist --device cuda
-python prepare_data.py --dataset officehome \
-  --officehome-raw "D:/datasets/OfficeHomeDataset_10072016" --device cuda
+git clone https://github.com/LieLieLieLieLie/FedPERG.git
+cd FedPERG/R1
+python -m pip install -r requirements.txt
+python reproduce.py --stage all --device cuda
 ```
 
-The resulting files are written below `data/`:
+Prepare the datasets before starting experiments. The detailed [`R1 README`](R1/README.md) gives the CUDA environment, official download links, data-cache preparation, development and confirmation seeds, frozen parameters, baseline provenance and individual experiment commands. In the versioned layout, data caches are prepared under `R0/data/`; no R0 implementation is needed to create these caches.
 
-```text
-data/
-├── cifar10_resnet18_ftta_v1.npz
-├── cifar100_resnet18_ftta_v1.npz
-├── officehome65_resnet18.npz
-├── officehome_raw_48.npz
-└── mnist_mobilenet_v3_64.npz
-```
+The revised implementation uses a held-out gradient to jointly fit coordinate confidence and temporal retention, then evaluates a span-matched paired candidate bank on a disjoint routing split. The reporting scripts generate PDF figures and CSV tables in `R1/results/`; a manuscript checkout is optional.
 
-The extraction uses torchvision's published ImageNet weights and deterministic,
-class-balanced indices. The six CIFAR-C target episodes are Gaussian noise,
-motion blur, contrast, brightness, pixelation, and JPEG compression at severity
-levels 1, 2, 3, 4, 5, and 3, respectively. CIFAR-10 uses 500 training and 200
-test examples per class; CIFAR-100 uses its full 500/100 per-class split.
-Dataset images and generated `.npz` caches remain excluded by `.gitignore`;
-redistribution rights remain with the original dataset owners.
+## Data and generated outputs
 
-## Reproducing the experiments
+Third-party datasets, derived data caches, `results/` directories, trained checkpoints and machine-specific caches are not uploaded. Download CIFAR-10/100 and their corruption archives, and Office-Home, from the official sources linked in the R1 README. Reproduction creates fresh experiment records and figures locally. The local revision's optional cohort-level summaries and archived models are not distributed here; fresh runs are evaluated from their own records.
 
-Run the invariant tests first:
+## Use and attribution
 
-```bash
-pytest -q
-```
-
-The frozen experiment groups can then be executed from the repository root:
-
-```bash
-# Ten-method, three-dataset, three-regime comparison (seeds 20--22)
-python reproduce.py --stage primary --device cuda
-
-# Paired AvgM+Gate comparison, operator attribution, and residual ablation
-python reproduce.py --stage attribution --device cuda
-
-# Calibration-shift and end-to-end/raw-input checks
-python reproduce.py --stage robustness --device cuda
-
-# Prospectively frozen four-candidate development audit
-python reproduce.py --stage development --device cuda
-
-# Statistical summaries, tables, and publication PDF figures
-python reproduce.py --stage report --device cuda
-```
-
-`python reproduce.py --stage all --device cuda` runs all groups in the order
-above. Completed run records are skipped by the individual runners, so an
-interrupted study can be resumed. JSON run records are written to
-`results/models/`, tabular summaries to `results/tables/`, and figures to
-`results/figures/`. These generated artifacts are not committed.
-
-The primary matrix uses 20 clients, 8 participating clients per round, 30
-communication rounds, one local epoch, and three paired seeds per condition.
-The confirmatory gate/operator attribution uses untouched seeds 50--59. See the
-frozen protocol documents for the precise estimands and interpretation limits.
-
-## Repository structure
-
-```text
-fedperg/          core models, aggregation operators, data partitions, trainer
-tests/             permutation-equivariance and masking invariants
-protocols/         descriptive frozen protocols for the reported experiments
-prepare_data.py    official-data download and feature-cache construction
-reproduce.py       grouped reproduction entry point
-run_*.py           experiment runners
-summarize_*.py     statistical summaries and table builders
-analyze_and_plot.py publication figure generation
-audit_results.py   result-integrity and paired-design audit
-```
-
-## License and research integrity
-
-The code is released under the **FedPERG Academic Evaluation License 1.0** for
-non-commercial evaluation and result reproduction during manuscript review. It
-is source-available, not OSI-approved open-source software. Reuse requires clear
-attribution; redistribution, rebranding, commercial use, or presenting the
-code, algorithms, experimental material, or substantial derivatives as one's
-own work is prohibited without written permission. See [LICENSE](LICENSE).
+See [`LICENSE`](LICENSE) for the academic-evaluation terms and attribution requirements. Do not present the code, method, figures or results as your own work. Citation metadata is provided in [`CITATION.cff`](CITATION.cff).
