@@ -47,7 +47,7 @@ reproduce.py
 Superseded CPU experiments, their results and obsolete reporting entry points
 are excluded. In the local manuscript workspace, `../R0` is an untouched source
 archive whose data caches are shared read-only; all R1 outputs stay under R1.
-In the public repository, `R0/` is reserved and initially empty. Prepare its
+In the public repository, `R0/` preserves the original uploaded code. Prepare its
 `data/` cache from the official sources below before running experiments.
 
 ## Reproduction
@@ -179,9 +179,9 @@ updates the generated experiment and development blocks directly inside
 `paper.tex`; it does not create separate chapter `.tex` files. Keep the short
 `BEGIN/END FEDPERG SECTION` markers used by `reporting/manuscript_sections.py`.
 
-The repository root distinguishes the original uploaded snapshot (`R0_0/`),
-the reserved `R0/` directory, and this revision (`R1/`). Run the commands in
-this README from `R1/`; the root README explains the version layout.
+The repository root distinguishes the original uploaded snapshot (`R0/`)
+from this revision (`R1/`). Run the commands in this README from `R1/`;
+the root README explains the version layout.
 
 The report also reads cohort-level means and contrast summaries from
 `results/models/protocols/summary_inputs.json`. These inputs remain separate

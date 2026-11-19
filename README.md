@@ -6,8 +6,7 @@ This repository separates the original submitted implementation from the current
 
 ## Versions
 
-- [`R0_0/`](R0_0/): the complete repository snapshot uploaded for the initial submission, preserved without changing its file contents.
-- `R0/`: a reserved version directory, currently containing only a placeholder. It is not the revised implementation.
+- [`R0/`](R0/): the complete repository snapshot uploaded for the initial submission, preserved without changing its file contents.
 - [`R1/`](R1/): the revised implementation, experiment protocols, tests and reporting code corresponding to the current revision. Start here to reproduce the revised study.
 
 The original snapshot remains available in Git history as well. Its historical README describes that snapshot; use the R1 instructions for the revised study.
